@@ -8,7 +8,7 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrast
 import java.util.List;
 
 @Repository
-public interface PagamentoRepository extends JpaRepository<PagamentoModel, Long> {
+public interface IPagamentoRepository extends JpaRepository<PagamentoModel, Long> {
     List<PagamentoModel> findByCodigoDebito(Integer codigoDebito);
     List<PagamentoModel> findByCpfOuCnpj(String cpfOuCnpj);
     List<PagamentoModel> findByStatus(String status);

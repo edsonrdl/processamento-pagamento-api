@@ -10,9 +10,9 @@ import java.util.List;
 @Repository
 public class PagamentoRepositoryImpl implements IPagamentoRespository<PagamentoModel, Long> {
 
-    private final PagamentoRepository pagamentoRepository;
+    private final IPagamentoRepository pagamentoRepository;
 
-    public PagamentoRepositoryImpl(PagamentoRepository pagamentoRepository) {
+    public PagamentoRepositoryImpl(IPagamentoRepository pagamentoRepository) {
         this.pagamentoRepository = pagamentoRepository;
     }
 

@@ -51,10 +51,15 @@ public class PagamentoMapperModel implements IPagamentoMapperModel {
     }
 
     private IEstadoPagamento mapStatusToEstado(StatusPagamento status) {
+        if (status == null) {
+            throw new IllegalArgumentException("O status não pode ser nulo");
+        }
         return switch (status) {
             case PENDENTE_PROCESSAMENTO -> new EstadoPendente();
             case PROCESSADO_SUCESSO -> new EstadoProcessadoComSucesso();
             case PROCESSADO_FALHA -> new EstadoProcessadoComFalha();
+            default -> throw new IllegalArgumentException("Status de pagamento desconhecido: " + status);
         };
     }
+    
 }
