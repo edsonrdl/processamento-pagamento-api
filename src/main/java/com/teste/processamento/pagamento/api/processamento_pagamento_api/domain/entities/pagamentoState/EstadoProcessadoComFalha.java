@@ -7,23 +7,21 @@ public class EstadoProcessadoComFalha implements IEstadoPagamento {
 
     @Override
     public void processar(Pagamento pagamento) {
-        throw new UnsupportedOperationException("Pagamento com falha não pode ser processado novamente diretamente.");
+        throw new UnsupportedOperationException("Pagamento já foi processado com sucesso.");
     }
 
     @Override
     public void cancelar(Pagamento pagamento) {
-        System.out.println("Pagamento com falha cancelado.");
-        pagamento.setEstado(new EstadoPendente());
+        throw new UnsupportedOperationException("Não é possível cancelar um pagamento processado com sucesso.");
     }
 
     @Override
     public void reprocessar(Pagamento pagamento) {
-        System.out.println("Reprocessando pagamento com falha...");
-        pagamento.setEstado(new EstadoPendente());
+        throw new UnsupportedOperationException("Pagamento processado com sucesso não pode ser reprocessado.");
     }
 
     @Override
     public void concluir(Pagamento pagamento) {
-        throw new UnsupportedOperationException("Pagamento com falha não pode ser concluído.");
+        System.out.println("Pagamento concluído com sucesso.");
     }
 }

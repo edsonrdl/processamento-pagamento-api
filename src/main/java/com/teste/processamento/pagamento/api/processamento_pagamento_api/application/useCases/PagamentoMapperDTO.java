@@ -2,6 +2,9 @@ package com.teste.processamento.pagamento.api.processamento_pagamento_api.applic
 
 import org.springframework.stereotype.Component;
 
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoRequestDTO;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoResponseDTO;
+
 @Component
 public class PagamentoMapperDTO implements IPagamentoMapperDTO {
 

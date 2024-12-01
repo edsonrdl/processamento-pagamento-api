@@ -1,9 +1,7 @@
 package com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.mapper;
 
-import java.util.Map;
-import java.util.Optional;
-
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.Pagamento;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.StatusPagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.pagamentoState.EstadoPendente;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.pagamentoState.EstadoProcessadoComFalha;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.pagamentoState.EstadoProcessadoComSucesso;
@@ -11,28 +9,52 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.model.PagamentoModel;
 
 public class PagamentoMapperModel implements IPagamentoMapperModel {
+
     @Override
     public PagamentoModel toPagamentoModel(Pagamento pagamento) {
         PagamentoModel pagamentoModel = new PagamentoModel();
+
         if (pagamento.getId() != null) {
             pagamentoModel.setId(pagamento.getId());
         }
+
+        pagamentoModel.setCodigoDebito(pagamento.getCodigoDebito());
+        pagamentoModel.setCpfOuCnpj(pagamento.getIdentificadorPagador());
+        pagamentoModel.setMetodoPagamento(pagamento.getMetodo());
+        pagamentoModel.setNumeroCartao(pagamento.getNumeroCartao());
         pagamentoModel.setValor(pagamento.getValor());
-        pagamentoModel.setEstado(pagamento.getEstado().getClass().getSimpleName());
+        pagamentoModel.setStatus(pagamento.getStatus());
+
         return pagamentoModel;
     }
 
     @Override
     public Pagamento toPagamento(PagamentoModel pagamentoModel) {
+        Pagamento pagamento = new Pagamento(
+                pagamentoModel.getCodigoDebito(),
+                pagamentoModel.getCpfOuCnpj(),
+                pagamentoModel.getMetodoPagamento(),
+                pagamentoModel.getNumeroCartao(),
+                pagamentoModel.getValor()
+        );
 
-        Map<String, IEstadoPagamento> estadoMap = Map.of(
-                "ESTADOPENDENTE", new EstadoPendente(),
-                "ESTADOPROCESSADOCOMSUCESSO", new EstadoProcessadoComSucesso(),
-                "ESTADOPROCESSADOCOMFALHA", new EstadoProcessadoComFalha());
+        pagamento.setId(pagamentoModel.getId());
 
-        IEstadoPagamento estado = Optional.ofNullable(estadoMap.get(pagamentoModel.getEstado().toUpperCase()))
-                .orElseThrow(() -> new IllegalArgumentException("Estado inválido: " + pagamentoModel.getEstado()));
+    
+        IEstadoPagamento estado = mapStatusToEstado(pagamentoModel.getStatus());
+        pagamento.setEstado(estado);
 
-        return new Pagamento(pagamentoModel.getId(), pagamentoModel.getValor(), estado);
+       
+        pagamento.setStatus(pagamentoModel.getStatus());
+
+        return pagamento;
+    }
+
+    private IEstadoPagamento mapStatusToEstado(StatusPagamento status) {
+        return switch (status) {
+            case PENDENTE_PROCESSAMENTO -> new EstadoPendente();
+            case PROCESSADO_SUCESSO -> new EstadoProcessadoComSucesso();
+            case PROCESSADO_FALHA -> new EstadoProcessadoComFalha();
+        };
     }
 }
