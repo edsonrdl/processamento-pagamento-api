@@ -5,12 +5,11 @@ import java.math.BigDecimal;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.MetodoPagamento;
 
 public class PagamentoRequestDTO {
-    private int codigoDebito;
+    private int codigoDebito; 
     private String identificadorPagador;
-    private MetodoPagamento metodoPagamento;
-    private String numeroCartao;
-    private BigDecimal valor;
-
+    private MetodoPagamento metodoPagamento; 
+    private String numeroCartao; 
+    private BigDecimal valor; 
 
     public int getCodigoDebito() {
         return codigoDebito;

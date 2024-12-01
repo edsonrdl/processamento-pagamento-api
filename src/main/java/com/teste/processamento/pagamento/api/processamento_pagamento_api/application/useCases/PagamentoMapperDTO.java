@@ -4,27 +4,28 @@ import org.springframework.stereotype.Component;
 
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoRequestDTO;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoResponseDTO;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.Pagamento;
 
 @Component
 public class PagamentoMapperDTO implements IPagamentoMapperDTO {
 
     @Override
     public Pagamento toPagamento(PagamentoRequestDTO requestDTO) {
-        Pagamento pagamento = new Pagamento();
-        pagamento.setCodigoDebito(requestDTO.getCodigoDebito());
-        pagamento.setCpfOuCnpj(requestDTO.getCpfOuCnpj());
-        pagamento.setMetodoPagamento(requestDTO.getMetodoPagamento());
-        pagamento.setNumeroCartao(requestDTO.getNumeroCartao());
-        pagamento.setValor(requestDTO.getValor());
-        return pagamento;
+        return new Pagamento(
+                requestDTO.getCodigoDebito(),
+                requestDTO.getIdentificadorPagador(),
+                requestDTO.getMetodoPagamento(),
+                requestDTO.getNumeroCartao(),
+                requestDTO.getValor()
+        );
     }
 
     @Override
     public PagamentoRequestDTO toPagamentoRequestDto(Pagamento pagamento) {
         PagamentoRequestDTO requestDTO = new PagamentoRequestDTO();
         requestDTO.setCodigoDebito(pagamento.getCodigoDebito());
-        requestDTO.setCpfOuCnpj(pagamento.getCpfOuCnpj());
-        requestDTO.setMetodoPagamento(pagamento.getMetodoPagamento());
+        requestDTO.setIdentificadorPagador(pagamento.getIdentificadorPagador());
+        requestDTO.setMetodoPagamento(pagamento.getMetodo()); 
         requestDTO.setNumeroCartao(pagamento.getNumeroCartao());
         requestDTO.setValor(pagamento.getValor());
         return requestDTO;
@@ -35,10 +36,11 @@ public class PagamentoMapperDTO implements IPagamentoMapperDTO {
         PagamentoResponseDTO responseDTO = new PagamentoResponseDTO();
         responseDTO.setId(pagamento.getId());
         responseDTO.setCodigoDebito(pagamento.getCodigoDebito());
-        responseDTO.setCpfOuCnpj(pagamento.getCpfOuCnpj());
-        responseDTO.setMetodoPagamento(pagamento.getMetodoPagamento());
+        responseDTO.setIdentificadorPagador(pagamento.getIdentificadorPagador());
+        responseDTO.setMetodoPagamento(pagamento.getMetodo()); 
+        responseDTO.setNumeroCartao(pagamento.getNumeroCartao());
         responseDTO.setValor(pagamento.getValor());
-        responseDTO.setEstado(pagamento.getEstado().getClass().getSimpleName());
+        responseDTO.setStatus(pagamento.getStatus());
         return responseDTO;
     }
 }

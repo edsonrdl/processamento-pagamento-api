@@ -6,14 +6,13 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.StatusPagamento;
 
 public class PagamentoResponseDTO {
-    private Long id;
-    private int codigoDebito;
-    private String identificadorPagador;
+    private Long id; 
+    private int codigoDebito; 
+    private String identificadorPagador; 
     private MetodoPagamento metodoPagamento;
     private String numeroCartao; 
-    private BigDecimal valor;
-    private StatusPagamento status;
-
+    private BigDecimal valor; 
+    private StatusPagamento status; 
 
     public Long getId() {
         return id;
