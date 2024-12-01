@@ -1,13 +1,13 @@
 package com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.pagamentoState;
 
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.Pagamento;
-import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.interfaces.repositories.useCases.IEstadoPagameto;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.interfaces.repositories.services.IEstadoPagamento;
 
-public class EstadoProcessadoComSucesso  implements IEstadoPagameto {
+public class EstadoProcessadoComSucesso implements IEstadoPagamento {
 
     @Override
     public void processar(Pagamento pagamento) {
-        throw new UnsupportedOperationException("Pagamento já processado com sucesso.");
+        throw new UnsupportedOperationException("Pagamento já foi processado com sucesso.");
     }
 
     @Override
@@ -16,8 +16,12 @@ public class EstadoProcessadoComSucesso  implements IEstadoPagameto {
     }
 
     @Override
+    public void reprocessar(Pagamento pagamento) {
+        throw new UnsupportedOperationException("Pagamento processado com sucesso não pode ser reprocessado.");
+    }
+
+    @Override
     public void concluir(Pagamento pagamento) {
         System.out.println("Pagamento concluído com sucesso.");
     }
-
 }
