@@ -70,7 +70,7 @@ public class PagamentoRepositoryImpl implements IPagamentoRespository<PagamentoM
     }
 
     @Override
-    public List<PagamentoModel> findByCpfOuCnpj(String cpfOuCnpj) {
+    public List<PagamentoModel> findByCpfOuCnpj(Integer cpfOuCnpj) {
         return pagamentoRepository.findByCpfOuCnpj(cpfOuCnpj); 
     }
 

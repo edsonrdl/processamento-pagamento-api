@@ -12,6 +12,7 @@ public class PagamentoMapperDTO implements IPagamentoMapperDTO {
 
     @Override
     public Pagamento toPagamento(PagamentoRequestDTO requestDTO) {
+      
         if ((requestDTO.getMetodoPagamento() == MetodoPagamento.CARTAO_CREDITO ||
                 requestDTO.getMetodoPagamento() == MetodoPagamento.CARTAO_DEBITO) &&
                 (requestDTO.getNumeroCartao() == null || requestDTO.getNumeroCartao().isEmpty())) {

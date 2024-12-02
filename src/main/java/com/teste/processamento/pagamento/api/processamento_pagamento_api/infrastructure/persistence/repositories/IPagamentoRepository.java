@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface IPagamentoRepository extends JpaRepository<PagamentoModel, Long> {
     List<PagamentoModel> findByCodigoDebito(Integer codigoDebito);
-    List<PagamentoModel> findByCpfOuCnpj(String cpfOuCnpj);
+    List<PagamentoModel> findByCpfOuCnpj(Integer cpfOuCnpj);
     List<PagamentoModel> findByStatus(String status);
 }
