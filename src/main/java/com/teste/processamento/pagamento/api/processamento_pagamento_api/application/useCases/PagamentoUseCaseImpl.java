@@ -1,16 +1,9 @@
-```java
 package com.teste.processamento.pagamento.api.processamento_pagamento_api.application.useCases;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoRequestDTO;
-import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoResponseDTO;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.Pagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.StatusPagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.interfaces.repositories.useCases.IPagamentoRespository;
@@ -24,30 +17,30 @@ public class PagamentoUseCaseImpl implements IPagamentoUseCase {
 
     private final IPagamentoMapperModel pagamentoMapperModel;
 
-    public PagamentoUseCaseImpl(IPagamentoRespository pagamentoRespository, IPagamentoMapperModel pagamentoMapperModel) {
+    public PagamentoUseCaseImpl(IPagamentoRespository<PagamentoModel, Long> pagamentoRespository,
+                                IPagamentoMapperModel pagamentoMapperModel) {
         this.pagamentoRespository = pagamentoRespository;
-        
         this.pagamentoMapperModel = pagamentoMapperModel;
     }
 
     @Override
     public PagamentoModel create(Pagamento pagamento) {
         PagamentoModel pagamentoModel = pagamentoMapperModel.toPagamentoModel(pagamento);
+        pagamentoModel.setStatus(StatusPagamento.PENDENTE_PROCESSAMENTO);
         return this.pagamentoRespository.create(pagamentoModel);
     }
 
     @Override
     public PagamentoModel findById(Long id) {
-        PagamentoModel pagamentoModel =pagamentoRespository.findById(id);
-        if (pagamentoModel!=null) {
+        PagamentoModel pagamentoModel = pagamentoRespository.findById(id);
+        if (pagamentoModel == null) {
             throw new RuntimeException("Pagamento não encontrado");
         }
-
-         return pagamentoModel;
+        return pagamentoModel;
     }
-    
+
     @Override
-    public List<PagamentoModel> findAll(){
+    public List<PagamentoModel> findAll() {
         List<PagamentoModel> pagamentoModelList = pagamentoRespository.findAll();
         if (pagamentoModelList.isEmpty()) {
             throw new RuntimeException("Não existem pagamentos");
@@ -58,23 +51,21 @@ public class PagamentoUseCaseImpl implements IPagamentoUseCase {
     @Override
     public PagamentoModel update(Pagamento pagamento, Long id) {
         PagamentoModel pagamentoModel = pagamentoMapperModel.toPagamentoModel(pagamento);
-        PagamentoModel existingModel = findById(id); 
+        PagamentoModel existingModel = findById(id);
         if (existingModel.getStatus().equals(StatusPagamento.PROCESSADO_SUCESSO)) {
             throw new RuntimeException("Pagamentos processados com sucesso não podem ser alterados");
         }
         return pagamentoRespository.update(pagamentoModel, id);
     }
 
-      @Override
+    @Override
     public boolean delete(Long id) {
         PagamentoModel pagamentoModel = findById(id);
         if (pagamentoModel.getStatus().equals(StatusPagamento.PENDENTE_PROCESSAMENTO)) {
             pagamentoModel.setStatus(StatusPagamento.INATIVO);
-            this.pagamentoRespository.create(pagamentoModel);
+            pagamentoRespository.update(pagamentoModel, id);
             return true;
         }
         throw new RuntimeException("Somente pagamentos pendentes podem ser excluídos logicamente.");
     }
-
 }
-```
