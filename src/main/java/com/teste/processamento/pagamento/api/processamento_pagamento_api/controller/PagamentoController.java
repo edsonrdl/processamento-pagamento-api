@@ -109,8 +109,7 @@ public class PagamentoController {
             Atualiza os dados de um pagamento. Pagamentos com o status 'PROCESSADO_SUCESSO' não podem ser alterados.
         """
     )
-    public ResponseEntity<PagamentoResponseDTO> updatePagamento(@PathVariable Long id,
-                                                                 @RequestBody PagamentoUpdateRequestDTO requestDTO) {
+    public ResponseEntity<PagamentoResponseDTO> updatePagamento(@RequestBody PagamentoUpdateRequestDTO requestDTO) {
         try {
             PagamentoModel updatedModel = pagamentoUseCase.update(requestDTO.getStatus(),requestDTO.getCodigoDebito());
             Pagamento updatedPagamento = pagamentoMapperModel.toPagamento(updatedModel);

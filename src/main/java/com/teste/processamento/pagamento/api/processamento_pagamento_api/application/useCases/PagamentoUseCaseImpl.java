@@ -50,6 +50,9 @@ public class PagamentoUseCaseImpl implements IPagamentoUseCase {
         if (existingModel.getStatus().equals(StatusPagamento.PROCESSADO_SUCESSO)) {
             throw new EstadoInvalidoException("Pagamentos processados com sucesso não podem ser alterados.");
         }
+        if (existingModel.getStatus().equals(StatusPagamento.PROCESSADO_FALHA) && statusPagamento.equals(StatusPagamento.PROCESSADO_FALHA)) {
+            throw new EstadoInvalidoException("Pagamentos processados com  falha só podem ser alterados para Pendente de Processamento .");
+        }
         return pagamentoRespository.update(existingModel, statusPagamento);
     }
 
