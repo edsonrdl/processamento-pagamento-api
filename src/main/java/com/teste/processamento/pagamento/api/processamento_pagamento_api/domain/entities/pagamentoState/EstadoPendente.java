@@ -7,26 +7,30 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.
 public class EstadoPendente implements IEstadoPagamento {
 
     @Override
+    public void alterarStatus(Pagamento pagamento, StatusPagamento novoStatus) {
+        if (novoStatus == StatusPagamento.PROCESSADO_SUCESSO) {
+            pagamento.setEstado(new EstadoProcessadoComSucesso());
+            pagamento.setStatus(StatusPagamento.PROCESSADO_SUCESSO);
+        } else if (novoStatus == StatusPagamento.PROCESSADO_FALHA) {
+            pagamento.setEstado(new EstadoProcessadoComFalha());
+            pagamento.setStatus(StatusPagamento.PROCESSADO_FALHA);
+        } else {
+            throw new UnsupportedOperationException("Transição inválida a partir do estado Pendente.");
+        }
+    }
+
+    @Override
     public void processar(Pagamento pagamento) {
-        System.out.println("Processando pagamento...");
-        pagamento.setEstado(new EstadoProcessadoComSucesso());
-        pagamento.setStatus(StatusPagamento.PROCESSADO_SUCESSO);
+        alterarStatus(pagamento, StatusPagamento.PROCESSADO_SUCESSO);
     }
 
     @Override
     public void cancelar(Pagamento pagamento) {
-        System.out.println("Cancelando pagamento...");
-        pagamento.setEstado(new EstadoProcessadoComFalha());
-        pagamento.setStatus(StatusPagamento.PROCESSADO_FALHA);
+        alterarStatus(pagamento, StatusPagamento.PROCESSADO_FALHA);
     }
 
     @Override
     public void reprocessar(Pagamento pagamento) {
         throw new UnsupportedOperationException("Pagamento pendente não pode ser reprocessado.");
-    }
-
-    @Override
-    public void concluir(Pagamento pagamento) {
-        throw new UnsupportedOperationException("Não é possível concluir um pagamento pendente.");
     }
 }

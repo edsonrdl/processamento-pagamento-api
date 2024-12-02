@@ -27,6 +27,16 @@ public class Pagamento {
         this.status = StatusPagamento.PENDENTE_PROCESSAMENTO; 
     }
 
+
+    public void alterarStatus(StatusPagamento novoStatus) {
+        if (novoStatus == null) {
+            throw new IllegalArgumentException("O novo status não pode ser nulo.");
+        }
+        // Delegar a validação e transição para o estado atual
+        this.estado.alterarStatus(this, novoStatus);
+    }
+    
+
     public void processar() {
         estado.processar(this);
     }

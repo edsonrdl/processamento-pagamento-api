@@ -6,27 +6,25 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.
 
 public class EstadoProcessadoComSucesso implements IEstadoPagamento {
 
-   @Override
+    @Override
+    public void alterarStatus(Pagamento pagamento, StatusPagamento novoStatus) {
+        throw new UnsupportedOperationException(
+            "Pagamentos processados com sucesso não podem ter seu status alterado."
+        );
+    }
+
+    @Override
     public void processar(Pagamento pagamento) {
-        throw new UnsupportedOperationException("Pagamento com falha não pode ser processado diretamente.");
+        throw new UnsupportedOperationException("Pagamento já foi processado com sucesso.");
     }
 
     @Override
     public void cancelar(Pagamento pagamento) {
-        System.out.println("Cancelando pagamento com falha...");
-        pagamento.setEstado(new EstadoPendente());
-        pagamento.setStatus(StatusPagamento.PENDENTE_PROCESSAMENTO);
+        throw new UnsupportedOperationException("Não é possível cancelar um pagamento processado com sucesso.");
     }
 
     @Override
     public void reprocessar(Pagamento pagamento) {
-        System.out.println("Reprocessando pagamento...");
-        pagamento.setEstado(new EstadoPendente());
-        pagamento.setStatus(StatusPagamento.PENDENTE_PROCESSAMENTO);
-    }
-
-    @Override
-    public void concluir(Pagamento pagamento) {
-        throw new UnsupportedOperationException("Pagamento com falha não pode ser concluído.");
+        throw new UnsupportedOperationException("Pagamento processado com sucesso não pode ser reprocessado.");
     }
 }
