@@ -168,3 +168,82 @@ http://localhost:8080/h2-console/
 
 Este projeto demonstrou a utilização de boas práticas no desenvolvimento de APIs RESTful, com um foco especial em arquitetura limpa e padrões como o State, garantindo flexibilidade, organização e robustez.
 
+# Testes Unitários - Sucesso
+
+Este documento descreve os testes unitários criados para validar os cenários de sucesso dos métodos implementados no caso de uso `PagamentoUseCaseImpl`. Esses testes foram desenvolvidos para garantir o funcionamento correto de cada unidade individualmente.
+
+## Testes Criados
+
+### 1. **deveCriarPagamentoComSucesso**
+- **Objetivo**: Validar se a criação de um pagamento funciona corretamente quando os dados estão corretos.
+- **Descrição**: O teste verifica se o pagamento é mapeado corretamente para o modelo e persistido no repositório.
+
+### 2. **deveBuscarPagamentoPorIdComSucesso**
+- **Objetivo**: Garantir que um pagamento seja corretamente recuperado pelo seu ID.
+- **Descrição**: Simula a busca no repositório para confirmar que o pagamento retornado possui os atributos esperados.
+
+### 3. **deveRetornarTodosOsPagamentosComSucesso**
+- **Objetivo**: Verificar se a listagem de todos os pagamentos funciona corretamente.
+- **Descrição**: Garante que a lista de pagamentos retornada do repositório não está vazia e contém os dados esperados.
+
+### 4. **deveAtualizarPagamentoComSucesso**
+- **Objetivo**: Validar a atualização do status de um pagamento quando o cenário é permitido.
+- **Descrição**: Testa transições de status válidas, como de `PENDENTE_PROCESSAMENTO` para `PROCESSADO_SUCESSO`.
+
+### 5. **deveExcluirPagamentoComSucesso**
+- **Objetivo**: Garantir que um pagamento pendente possa ser logicamente excluído.
+- **Descrição**: Verifica se o status do pagamento é atualizado para `INATIVO` após a exclusão lógica.
+
+### 6. **deveBuscarPagamentosPorCodigoDebitoComSucesso**
+- **Objetivo**: Validar se a busca por pagamentos através do código de débito retorna os resultados esperados.
+- **Descrição**: Confirma que o repositório filtra corretamente os pagamentos pelo código de débito.
+
+### 7. **deveBuscarPagamentosPorCpfOuCnpjComSucesso**
+- **Objetivo**: Testar a recuperação de pagamentos filtrados pelo CPF ou CNPJ do pagador.
+- **Descrição**: Simula a busca e verifica se os resultados retornados correspondem ao pagador informado.
+
+### 8. **deveBuscarPagamentosPorStatusComSucesso**
+- **Objetivo**: Validar que os pagamentos podem ser corretamente filtrados pelo status.
+- **Descrição**: Garante que a consulta retorna apenas os pagamentos com o status especificado.
+
+## Motivação
+
+Esses testes foram implementados para garantir a confiabilidade das operações do caso de uso. Cada teste foca em validar o comportamento de sucesso de uma funcionalidade específica, reduzindo riscos de falhas em cenários reais.
+# Testes de Falha no Use Case `PagamentoUseCaseImpl`
+
+Este documento descreve os testes criados para validar as falhas esperadas no serviço `PagamentoUseCaseImpl` em cenários onde os usuários tentam realizar ações inválidas. Abaixo estão listados os testes unitários desenvolvidos e a justificativa para sua existência.
+
+## Testes Criados
+
+### 1. `naoDeveAtualizarPagamentoProcessadoComSucesso`
+- **Motivo:** Validar que um pagamento com status `PROCESSADO_SUCESSO` não pode ser alterado para outro status.
+- **Mensagem Esperada:** "Pagamentos processados com sucesso não podem ser alterados."
+
+### 2. `naoDeveExcluirPagamentoNaoPendente`
+- **Motivo:** Garantir que apenas pagamentos com status `PENDENTE_PROCESSAMENTO` possam ser excluídos logicamente.
+- **Mensagem Esperada:** "Somente pagamentos pendentes podem ser excluídos logicamente."
+
+### 3. `naoDeveEncontrarPagamentoInexistentePorId`
+- **Motivo:** Validar que uma tentativa de buscar um pagamento inexistente por ID retorne uma exceção.
+- **Mensagem Esperada:** "Pagamento não encontrado."
+
+### 4. `naoDeveAlterarParaStatusInvalido`
+- **Motivo:** Garantir que um pagamento com status `PROCESSADO_FALHA` só possa ser alterado para `PENDENTE_PROCESSAMENTO`.
+- **Mensagem Esperada:** "Pagamentos processados com falha só podem ser alterados para Pendente de Processamento."
+
+### 5. `naoDeveRetornarListaVaziaDePagamentos`
+- **Motivo:** Validar que uma tentativa de buscar todos os pagamentos retorne uma exceção caso a lista esteja vazia.
+- **Mensagem Esperada:** "Nenhum pagamento encontrado."
+
+## Como os Testes Validam as Falhas
+
+Os testes foram desenvolvidos utilizando o framework `JUnit 5` e bibliotecas de mock (`Mockito`). Para cada cenário de falha, foram simuladas situações onde o comportamento esperado era uma exceção com mensagens claras ao usuário. O uso de métodos como `assertThrows` assegura que o sistema responde adequadamente em situações inválidas.
+
+## Benefícios da Abordagem
+- **Robustez:** Garante que o sistema não permita ações indevidas nos pagamentos.
+- **Clareza:** Oferece mensagens específicas para o usuário ao encontrar erros.
+- **Manutenibilidade:** Cenários de falha estão isolados e testados individualmente, facilitando ajustes futuros.
+
+Os testes foram implementados para garantir que todas as regras de negócio relacionadas a falhas sejam respeitadas. Isso proporciona confiança na estabilidade do sistema em produção.
+
+
