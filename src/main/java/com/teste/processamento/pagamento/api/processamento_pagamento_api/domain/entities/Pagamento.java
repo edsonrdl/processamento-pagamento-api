@@ -10,14 +10,14 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.
 public class Pagamento {
     private Long id;
     private int codigoDebito;
-    private int identificadorPagador;
+    private String identificadorPagador;
     private MetodoPagamento metodo;
     private String numeroCartao;
     private BigDecimal valor;
     private IEstadoPagamento estado;
     private StatusPagamento status;
 
-    public Pagamento(int codigoDebito, int identificadorPagador, MetodoPagamento metodo, String numeroCartao, BigDecimal valor) {
+    public Pagamento(int codigoDebito, String identificadorPagador, MetodoPagamento metodo, String numeroCartao, BigDecimal valor) {
         this.codigoDebito = codigoDebito;
         this.identificadorPagador = identificadorPagador;
         this.metodo = metodo;
@@ -55,11 +55,11 @@ public class Pagamento {
         this.codigoDebito = codigoDebito;
     }
 
-    public int getIdentificadorPagador() {
+    public String getIdentificadorPagador() {
         return identificadorPagador;
     }
 
-    public void setIdentificadorPagador(int identificadorPagador) {
+    public void setIdentificadorPagador(String identificadorPagador) {
         this.identificadorPagador = identificadorPagador;
     }
 

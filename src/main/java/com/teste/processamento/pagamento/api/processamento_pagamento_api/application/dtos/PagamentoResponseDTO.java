@@ -8,7 +8,7 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.
 public class PagamentoResponseDTO {
     private Long id; 
     private int codigoDebito; 
-    private int identificadorPagador; 
+    private String identificadorPagador; 
     private MetodoPagamento metodoPagamento;
     private String numeroCartao; 
     private BigDecimal valor; 
@@ -30,11 +30,11 @@ public class PagamentoResponseDTO {
         this.codigoDebito = codigoDebito;
     }
 
-    public int getIdentificadorPagador() {
+    public String getIdentificadorPagador() {
         return identificadorPagador;
     }
 
-    public void setIdentificadorPagador(int identificadorPagador) {
+    public void setIdentificadorPagador(String identificadorPagador) {
         this.identificadorPagador = identificadorPagador;
     }
 

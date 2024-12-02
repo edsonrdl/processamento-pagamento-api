@@ -24,7 +24,7 @@ public class PagamentoModel {
     private Integer codigoDebito;
 
     @Column(name = "cpf_ou_cnpj", nullable = false, length = 14)
-    private int cpfOuCnpj;
+    private String cpfOuCnpj;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "metodo_pagamento", nullable = false)

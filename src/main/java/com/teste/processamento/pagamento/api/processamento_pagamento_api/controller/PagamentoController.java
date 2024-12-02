@@ -2,11 +2,15 @@ package com.teste.processamento.pagamento.api.processamento_pagamento_api.contro
 
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoRequestDTO;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoResponseDTO;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoUpdateRequestDTO;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.useCases.IPagamentoMapperDTO;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.useCases.IPagamentoUseCase;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.Pagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.StatusPagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.model.PagamentoModel;
+
+import io.swagger.v3.oas.annotations.Operation;
+
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.mapper.IPagamentoMapperModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,6 +38,14 @@ public class PagamentoController {
     }
 
     @PostMapping
+    @Operation(
+        summary = "Registrar um novo pagamento",
+        description = """
+            Registra um novo pagamento no sistema com o status inicial 'PENDENTE_PROCESSAMENTO'.
+            - Método de pagamento pode ser 'PIX', 'BOLETO', 'CARTAO_CREDITO' ou 'CARTAO_DEBITO'.
+            - Caso seja 'CARTAO_CREDITO' ou 'CARTAO_DEBITO', o número do cartão deve ser informado.
+        """
+    )
     public ResponseEntity<PagamentoResponseDTO> createPagamento(@RequestBody PagamentoRequestDTO requestDTO) {
         Pagamento pagamento = pagamentoMapperDTO.toPagamento(requestDTO);
         PagamentoModel pagamentoModel = pagamentoUseCase.create(pagamento);
@@ -42,8 +54,11 @@ public class PagamentoController {
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
-
     @GetMapping("/{id}")
+    @Operation(
+        summary = "Obter informações de um pagamento",
+        description = "Retorna os dados de um pagamento pelo ID fornecido."
+    )
     public ResponseEntity<PagamentoResponseDTO> getPagamentoById(@PathVariable Long id) {
         try {
             PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
@@ -56,6 +71,10 @@ public class PagamentoController {
     }
 
     @GetMapping
+    @Operation(
+        summary = "Listar todos os pagamentos",
+        description = "Retorna todos os pagamentos registrados no sistema."
+    )
     public ResponseEntity<List<PagamentoResponseDTO>> getAllPagamentos() {
         try {
             List<PagamentoModel> pagamentos = pagamentoUseCase.findAll();
@@ -69,12 +88,31 @@ public class PagamentoController {
         }
     }
 
+    @GetMapping("/filtro/codigoDebito/{codigoDebito}")
+    @Operation(
+        summary = "Filtrar pagamentos por código de débito",
+        description = "Filtra os pagamentos com base no código de débito informado."
+    )
+    public ResponseEntity<List<PagamentoResponseDTO>> getByCodigoDebito(@PathVariable Integer codigoDebito) {
+        List<PagamentoModel> pagamentos = pagamentoUseCase.findByCodigoDebito(codigoDebito);
+        List<PagamentoResponseDTO> responseDTOList = pagamentos.stream()
+                .map(pagamentoMapperModel::toPagamento)
+                .map(pagamentoMapperDTO::toPagamentoResponseDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(responseDTOList, HttpStatus.OK);
+    }
+
     @PutMapping("/{id}")
+    @Operation(
+        summary = "Atualizar um pagamento",
+        description = """
+            Atualiza os dados de um pagamento. Pagamentos com o status 'PROCESSADO_SUCESSO' não podem ser alterados.
+        """
+    )
     public ResponseEntity<PagamentoResponseDTO> updatePagamento(@PathVariable Long id,
-                                                                 @RequestBody PagamentoRequestDTO requestDTO) {
+                                                                 @RequestBody PagamentoUpdateRequestDTO requestDTO) {
         try {
-            Pagamento pagamento = pagamentoMapperDTO.toPagamento(requestDTO);
-            PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
+            PagamentoModel updatedModel = pagamentoUseCase.update(requestDTO.getStatus(),requestDTO.getCodigoDebito());
             Pagamento updatedPagamento = pagamentoMapperModel.toPagamento(updatedModel);
             PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(updatedPagamento);
             return new ResponseEntity<>(responseDTO, HttpStatus.OK);
@@ -83,71 +121,17 @@ public class PagamentoController {
         }
     }
 
-
     @DeleteMapping("/{id}")
+    @Operation(
+        summary = "Excluir pagamento logicamente",
+        description = """
+            Exclui logicamente um pagamento alterando seu status para 'INATIVO'. Somente pagamentos pendentes podem ser excluídos.
+        """
+    )
     public ResponseEntity<Void> deletePagamento(@PathVariable Long id) {
         try {
             pagamentoUseCase.delete(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-
-    @PostMapping("/{id}/processar")
-    public ResponseEntity<PagamentoResponseDTO> processarPagamento(@PathVariable Long id) {
-        try {
-            PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
-            Pagamento pagamento = pagamentoMapperModel.toPagamento(pagamentoModel);
-            if (pagamento.getStatus().equals(StatusPagamento.PENDENTE_PROCESSAMENTO)) {
-                pagamento.setStatus(StatusPagamento.PROCESSADO_SUCESSO);
-                PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
-                PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(
-                        pagamentoMapperModel.toPagamento(updatedModel)
-                );
-                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-            }
-            throw new RuntimeException("Pagamento não está pendente e não pode ser processado.");
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @PostMapping("/{id}/cancelar")
-    public ResponseEntity<PagamentoResponseDTO> cancelarPagamento(@PathVariable Long id) {
-        try {
-            PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
-            Pagamento pagamento = pagamentoMapperModel.toPagamento(pagamentoModel);
-            if (pagamento.getStatus().equals(StatusPagamento.PENDENTE_PROCESSAMENTO)) {
-                pagamento.setStatus(StatusPagamento.PROCESSADO_FALHA);
-                PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
-                PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(
-                        pagamentoMapperModel.toPagamento(updatedModel)
-                );
-                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-            }
-            throw new RuntimeException("Pagamento não está pendente e não pode ser cancelado.");
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-
-    @PostMapping("/{id}/reprocessar")
-    public ResponseEntity<PagamentoResponseDTO> reprocessarPagamento(@PathVariable Long id) {
-        try {
-            PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
-            Pagamento pagamento = pagamentoMapperModel.toPagamento(pagamentoModel);
-            if (pagamento.getStatus().equals(StatusPagamento.PROCESSADO_FALHA)) {
-                pagamento.setStatus(StatusPagamento.PENDENTE_PROCESSAMENTO);
-                PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
-                PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(
-                        pagamentoMapperModel.toPagamento(updatedModel)
-                );
-                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-            }
-            throw new RuntimeException("Pagamento não pode ser reprocessado.");
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
