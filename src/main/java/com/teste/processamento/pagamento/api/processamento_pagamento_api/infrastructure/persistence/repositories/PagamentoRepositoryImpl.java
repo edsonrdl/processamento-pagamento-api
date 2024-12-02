@@ -67,7 +67,7 @@ public class PagamentoRepositoryImpl implements IPagamentoRespository<PagamentoM
     }
 
     @Override
-    public List<PagamentoModel> findByStatus(String status) {
+    public List<PagamentoModel> findByStatus(StatusPagamento  status) {
         return pagamentoRepository.findByStatus(status);
     }
 }

@@ -20,5 +20,5 @@ public interface IPagamentoUseCase {
 
     List<PagamentoModel> findByCpfOuCnpj(String cpfOuCnpj);
 
-    List<PagamentoModel> findByStatus(String status);
+    List<PagamentoModel> findByStatus(StatusPagamento status);
 }

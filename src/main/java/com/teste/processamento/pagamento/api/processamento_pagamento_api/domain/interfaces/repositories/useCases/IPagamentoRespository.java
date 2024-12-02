@@ -11,5 +11,5 @@ public interface IPagamentoRespository<T, ID> {
     boolean delete(ID id);
     List<T> findByCodigoDebito(Integer codigoDebito);
     List<T> findByCpfOuCnpj(String cpfOuCnpj);
-    List<T> findByStatus(String status);
+    List<T> findByStatus(StatusPagamento status);
 }

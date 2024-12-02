@@ -103,7 +103,7 @@ public class PagamentoController {
 
     @GetMapping("/filtro/status/{status}")
     @Operation(summary = "Filtrar pagamentos por status", description = "Filtra os pagamentos com base no status informado.")
-    public ResponseEntity<List<PagamentoResponseDTO>> getByStatus(@PathVariable String status) {
+    public ResponseEntity<List<PagamentoResponseDTO>> getByStatus(@PathVariable StatusPagamento status) {
         List<PagamentoModel> pagamentos = pagamentoUseCase.findByStatus(status);
         List<PagamentoResponseDTO> responseDTOList = pagamentos.stream()
                 .map(pagamentoMapperModel::toPagamento)

@@ -79,7 +79,7 @@ public class PagamentoUseCaseImpl implements IPagamentoUseCase {
     }
 
     @Override
-    public List<PagamentoModel> findByStatus(String status) {
+    public List<PagamentoModel> findByStatus(StatusPagamento status) {
         return pagamentoRespository.findByStatus(status);
     }
 }
