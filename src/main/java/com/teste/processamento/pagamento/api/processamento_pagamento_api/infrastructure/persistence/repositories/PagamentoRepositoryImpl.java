@@ -1,13 +1,15 @@
 package com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.persistence.repositories;
 
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.model.PagamentoModel;
+
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.StatusPagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.interfaces.repositories.useCases.IPagamentoRespository;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Repository
+@Service
 public class PagamentoRepositoryImpl implements IPagamentoRespository<PagamentoModel, Long> {
 
     private final IPagamentoRepository pagamentoRepository;
@@ -34,6 +36,7 @@ public class PagamentoRepositoryImpl implements IPagamentoRespository<PagamentoM
     }
 
     @Override
+    @Transactional
     public PagamentoModel update(PagamentoModel model, Long id) {
         PagamentoModel existingModel = this.findById(id); 
 
@@ -48,6 +51,7 @@ public class PagamentoRepositoryImpl implements IPagamentoRespository<PagamentoM
     }
 
     @Override
+    @Transactional
     public boolean delete(Long id) {
         PagamentoModel model = this.findById(id); 
 

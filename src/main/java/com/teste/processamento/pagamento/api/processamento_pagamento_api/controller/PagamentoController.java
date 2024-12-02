@@ -1,9 +1,13 @@
 package com.teste.processamento.pagamento.api.processamento_pagamento_api.controller;
 
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoRequestDTO;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.dtos.PagamentoResponseDTO;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.useCases.IPagamentoMapperDTO;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.application.useCases.IPagamentoUseCase;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.Pagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.StatusPagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.model.PagamentoModel;
-import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.mapper.PagamentoMapperModel;
+import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.mapper.IPagamentoMapperModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,86 +20,134 @@ import java.util.stream.Collectors;
 @RequestMapping("/pagamentos")
 public class PagamentoController {
 
-    private final IPagamentoService pagamentoService;
-    
-    private final PagamentoMapperModel mapper;
+    private final IPagamentoMapperDTO pagamentoMapperDTO;
+    private final IPagamentoMapperModel pagamentoMapperModel;
+    private final IPagamentoUseCase pagamentoUseCase;
 
     @Autowired
-    public PagamentoController(IPagamentoService pagamentoService, PagamentoMapperModel mapper) {
-        this.pagamentoService = pagamentoService;
-        this.mapper = mapper;
+    public PagamentoController(IPagamentoMapperDTO pagamentoMapperDTO,
+                                IPagamentoMapperModel pagamentoMapperModel,
+                                IPagamentoUseCase pagamentoUseCase) {
+        this.pagamentoMapperDTO = pagamentoMapperDTO;
+        this.pagamentoMapperModel = pagamentoMapperModel;
+        this.pagamentoUseCase = pagamentoUseCase;
     }
 
     @PostMapping
-    public ResponseEntity<Pagamento> createPagamento(@RequestBody Pagamento pagamento) {
-        Pagamento createdPagamento = pagamentoService.createPagamento(pagamento);
-        return new ResponseEntity<>(createdPagamento, HttpStatus.CREATED);
+    public ResponseEntity<PagamentoResponseDTO> createPagamento(@RequestBody PagamentoRequestDTO requestDTO) {
+        Pagamento pagamento = pagamentoMapperDTO.toPagamento(requestDTO);
+        PagamentoModel pagamentoModel = pagamentoUseCase.create(pagamento);
+        Pagamento pagamentoMapped = pagamentoMapperModel.toPagamento(pagamentoModel);
+        PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(pagamentoMapped);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
+
     @GetMapping("/{id}")
-    public ResponseEntity<Pagamento> getPagamentoById(@PathVariable Long id) {
+    public ResponseEntity<PagamentoResponseDTO> getPagamentoById(@PathVariable Long id) {
         try {
-            Pagamento pagamento = pagamentoService.findPagamentoById(id);
-            return new ResponseEntity<>(pagamento, HttpStatus.OK);
+            PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
+            Pagamento pagamento = pagamentoMapperModel.toPagamento(pagamentoModel);
+            PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(pagamento);
+            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Pagamento>> getAllPagamentos() {
-        List<PagamentoModel> pagamentos = pagamentoService.findAllPagamentos();
-        List<Pagamento> pagamentosMapped = pagamentos.stream()
-                .map(mapper::toPagamento)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(pagamentosMapped, HttpStatus.OK);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Pagamento> updatePagamento(@PathVariable Long id, @RequestBody Pagamento pagamento) {
+    public ResponseEntity<List<PagamentoResponseDTO>> getAllPagamentos() {
         try {
-            Pagamento updatedPagamento = pagamentoService.updatePagamento(id, pagamento);
-            return new ResponseEntity<>(updatedPagamento, HttpStatus.OK);
+            List<PagamentoModel> pagamentos = pagamentoUseCase.findAll();
+            List<PagamentoResponseDTO> responseDTOList = pagamentos.stream()
+                    .map(pagamentoMapperModel::toPagamento)
+                    .map(pagamentoMapperDTO::toPagamentoResponseDto)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(responseDTOList, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PagamentoResponseDTO> updatePagamento(@PathVariable Long id,
+                                                                 @RequestBody PagamentoRequestDTO requestDTO) {
+        try {
+            Pagamento pagamento = pagamentoMapperDTO.toPagamento(requestDTO);
+            PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
+            Pagamento updatedPagamento = pagamentoMapperModel.toPagamento(updatedModel);
+            PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(updatedPagamento);
+            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePagamento(@PathVariable Long id) {
         try {
-            pagamentoService.deletePagamento(id);
+            pagamentoUseCase.delete(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
+
     @PostMapping("/{id}/processar")
-    public ResponseEntity<Pagamento> processarPagamento(@PathVariable Long id) {
+    public ResponseEntity<PagamentoResponseDTO> processarPagamento(@PathVariable Long id) {
         try {
-            Pagamento pagamento = pagamentoService.processarPagamento(id);
-            return new ResponseEntity<>(pagamento, HttpStatus.OK);
+            PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
+            Pagamento pagamento = pagamentoMapperModel.toPagamento(pagamentoModel);
+            if (pagamento.getStatus().equals(StatusPagamento.PENDENTE_PROCESSAMENTO)) {
+                pagamento.setStatus(StatusPagamento.PROCESSADO_SUCESSO);
+                PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
+                PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(
+                        pagamentoMapperModel.toPagamento(updatedModel)
+                );
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+            }
+            throw new RuntimeException("Pagamento não está pendente e não pode ser processado.");
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/{id}/cancelar")
-    public ResponseEntity<Pagamento> cancelarPagamento(@PathVariable Long id) {
+    public ResponseEntity<PagamentoResponseDTO> cancelarPagamento(@PathVariable Long id) {
         try {
-            Pagamento pagamento = pagamentoService.cancelarPagamento(id);
-            return new ResponseEntity<>(pagamento, HttpStatus.OK);
+            PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
+            Pagamento pagamento = pagamentoMapperModel.toPagamento(pagamentoModel);
+            if (pagamento.getStatus().equals(StatusPagamento.PENDENTE_PROCESSAMENTO)) {
+                pagamento.setStatus(StatusPagamento.PROCESSADO_FALHA);
+                PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
+                PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(
+                        pagamentoMapperModel.toPagamento(updatedModel)
+                );
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+            }
+            throw new RuntimeException("Pagamento não está pendente e não pode ser cancelado.");
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/{id}/concluir")
-    public ResponseEntity<Pagamento> concluirPagamento(@PathVariable Long id) {
+
+    @PostMapping("/{id}/reprocessar")
+    public ResponseEntity<PagamentoResponseDTO> reprocessarPagamento(@PathVariable Long id) {
         try {
-            Pagamento pagamento = pagamentoService.concluirPagamento(id);
-            return new ResponseEntity<>(pagamento, HttpStatus.OK);
+            PagamentoModel pagamentoModel = pagamentoUseCase.findById(id);
+            Pagamento pagamento = pagamentoMapperModel.toPagamento(pagamentoModel);
+            if (pagamento.getStatus().equals(StatusPagamento.PROCESSADO_FALHA)) {
+                pagamento.setStatus(StatusPagamento.PENDENTE_PROCESSAMENTO);
+                PagamentoModel updatedModel = pagamentoUseCase.update(pagamento, id);
+                PagamentoResponseDTO responseDTO = pagamentoMapperDTO.toPagamentoResponseDto(
+                        pagamentoMapperModel.toPagamento(updatedModel)
+                );
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+            }
+            throw new RuntimeException("Pagamento não pode ser reprocessado.");
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

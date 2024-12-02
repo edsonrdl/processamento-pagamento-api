@@ -26,7 +26,6 @@ public class PagamentoUseCaseImpl implements IPagamentoUseCase {
     @Override
     public PagamentoModel create(Pagamento pagamento) {
         PagamentoModel pagamentoModel = pagamentoMapperModel.toPagamentoModel(pagamento);
-        pagamentoModel.setStatus(StatusPagamento.PENDENTE_PROCESSAMENTO);
         return this.pagamentoRespository.create(pagamentoModel);
     }
 

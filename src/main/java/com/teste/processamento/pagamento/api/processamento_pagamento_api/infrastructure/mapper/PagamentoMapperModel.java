@@ -1,5 +1,7 @@
 package com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.Pagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.enuns.StatusPagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.entities.pagamentoState.EstadoPendente;
@@ -8,6 +10,7 @@ import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.domain.interfaces.repositories.services.IEstadoPagamento;
 import com.teste.processamento.pagamento.api.processamento_pagamento_api.infrastructure.model.PagamentoModel;
 
+@Component
 public class PagamentoMapperModel implements IPagamentoMapperModel {
 
     @Override
